@@ -1,17 +1,25 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { ClerkLoaded, SignedIn, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Form from "next/form";
-import { TrolleyIcon } from "@sanity/icons";
-
+import { PackageIcon, TrolleyIcon } from "@sanity/icons";
 function Header() {
   const { user } = useUser();
+
+  const createClerkPasskey = async () => {
+    try {
+      const response = await user?.createPasskey();
+      console.log(response);
+    } catch (err){
+      console.error("Error:", JSON.stringify(err, null, 2));
+    }
+  };
 
   return (
     <header className="flex flex-wrap justify-between items-center px-4 py-2">
       {/* Top row */}
-      <div>
+      <div className="flex w-full flex-wrap justify-between items-center">
         <Link
           href="/"
           className="text-2xl font-bold hover:opacity-50 
@@ -35,15 +43,54 @@ function Header() {
           />
         </Form>
 
-        <div>
-            <Link href='/basket' 
-                className="flex-1 relative flex justify-center sm:justify-start 
+        <div className="flex items-center space-x-4 mt-4 sm:mt-0 flex-1 sm:flex-none">
+          <Link
+            href="/basket"
+            className="flex-1 relative flex justify-center sm:justify-start 
                 text-white font-bold py-2 px-4 hover:bg-blue-700 bg-blue-500 space-x-2
                 items-center sm:flex-none rounded"
-            >
-              <TrolleyIcon className='w-6 h-6'/>
-              <span>My Basket</span>
-            </Link>
+          >
+            <TrolleyIcon className="w-6 h-6" />
+            <span>My Basket</span>
+          </Link>
+
+          {/* User area */}
+          <ClerkLoaded>
+            <SignedIn>
+              <Link
+                href="/orders"
+                className="flex-1 relative flex justify-center sm:justify-start sm:flex-none
+                  items-center space-x-2 bg-blue-500 hover:bg-blue-700 text-white font-bold
+                  py-2 px-4 rounded"
+              >
+                <PackageIcon className="w-6 h-6" />
+                <span>My Orders</span>
+              </Link>
+            </SignedIn>
+
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <UserButton />
+
+                <div className="hidden sm:block text-xs">
+                  <p className="text-gray-400">Welcome back</p>
+                  <p className="font-bold">{user.fullName}!</p>
+                </div>
+              </div>
+            ) : (
+              <SignInButton mode="modal" />
+            )}
+
+            {user?.passkeys.length === 0 && (
+              <button
+                onClick={createClerkPasskey}
+                className="bg-white hover:bg-blue-700 hover:text-white animate-pulse
+                  text-blue-500 font-bold py-2 px-4 rounded border-blue-300 border"
+              >
+                New passkey!
+              </button>
+            )}
+          </ClerkLoaded>
         </div>
       </div>
     </header>
