@@ -120,7 +120,7 @@ export type Product = {
   _updatedAt: string;
   _rev: string;
   name?: string;
-  slug?: Slug;
+  slug?: Slug; 
   image?: {
     asset?: {
       _ref: string;
